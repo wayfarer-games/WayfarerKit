@@ -1,0 +1,22 @@
+{
+  "name": "com.wayfarer.kit",
+  "version": "0.0.1",
+  "displayName": "Wayfarer Kit",
+  "description": "Includes basic patterns, systems, and extension classes.",
+  "unity": "2023.2",
+  "dependencies": {
+    "com.unity.logging": "1.0.16",
+    "com.unity.burst": "1.8.16",
+    "com.unity.collections": "2.1.4"
+  },
+  "keywords": [
+    "patterns",
+    "kit",
+    "framework"
+  ],
+  "author": {
+    "name": "Nikita Belkin",
+    "email": "nbelkin@me.com",
+    "url": "https://github.com/nbelkin"
+  }
+}
