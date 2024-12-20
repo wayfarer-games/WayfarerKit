@@ -1,14 +1,13 @@
 {
   "name": "com.wayfarer.kit",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "displayName": "Wayfarer Kit",
   "description": "Includes basic patterns, systems, and extension classes.",
   "unity": "2023.2",
   "dependencies": {
     "com.unity.logging": "1.0.16",
     "com.unity.burst": "1.8.16",
-    "com.unity.collections": "2.1.4",
-    "com.wayfarer.kit.primetween": "1.2.2"
+    "com.unity.collections": "2.1.4"
   },
   "keywords": [
     "patterns",
