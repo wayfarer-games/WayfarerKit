@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.eflatun.scenereference": "git+https://github.com/starikcetin/Eflatun.SceneReference.git#4.1.1",
-    "com.kyrylokuzyk.primetween": "file:../Assets/Plugins/PrimeTween/internal/com.kyrylokuzyk.primetween.tgz",
     "com.unity.addressables": "2.3.1",
     "com.unity.burst": "1.8.18",
     "com.unity.collab-proxy": "2.5.2",
@@ -16,6 +15,7 @@
     "com.unity.timeline": "1.8.7",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.5",
+    "com.wayfarer.kit.primetween": "https://github.com/wayfarer-games/WayfarerKit.PrimeTween.git",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
