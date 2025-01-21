@@ -1,6 +1,6 @@
 {
   "name": "com.wayfarer.kit",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "displayName": "Wayfarer Kit",
   "description": "Includes basic patterns, systems, and extension classes.",
   "unity": "2023.2",

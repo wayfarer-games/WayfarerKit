@@ -55,7 +55,7 @@ namespace WayfarerKit.Editor.Helpers
                 entriesAdded[0].SetLabel(label, true, true, true);
             }
             group.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entriesAdded, false, true);
-            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entriesAdded, true);
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entriesAdded, false);
         }
 
         // /* ============= CODE WITH SEPARATE PACKING MODE =============  */
