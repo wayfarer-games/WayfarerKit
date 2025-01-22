@@ -52,7 +52,7 @@ namespace WayfarerKit.Editor.Helpers
 
             if (!string.IsNullOrEmpty(label))
             {
-                entriesAdded[0].SetLabel(label, true, true, true);
+                entriesAdded[0].SetLabel(label, true, true, false);
             }
             group.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entriesAdded, false, true);
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entriesAdded, false);
