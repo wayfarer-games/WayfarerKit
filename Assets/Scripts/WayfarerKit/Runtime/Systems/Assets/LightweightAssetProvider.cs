@@ -18,10 +18,10 @@ using Object = UnityEngine.Object;
 
 namespace WayfarerKit.Systems.Assets
 {
-    [Serializable]
-    [Preserve]
+    [Serializable, Preserve]
     public class AddressablesRemoteConfig
     {
+        public List<AddressablesRemoteEntry> Entries;
         [Serializable]
         public class AddressablesRemoteEntry
         {
@@ -30,48 +30,41 @@ namespace WayfarerKit.Systems.Assets
             public string catalogName;
             public string bundleName;
         }
-        public List<AddressablesRemoteEntry> Entries;
-    } 
-    
-    
+    }
+
+
     /// <summary>
     ///     Load assets using Addressables and cache them in memory.
     /// </summary>
     public class LightweightAssetProvider : IAssetProvider
     {
-        private AsyncOperationHandle<IResourceLocator> _addressablesInitHandle;
-        private AsyncOperationHandle<IResourceLocator> _loadCatalogHandle;
-        private AsyncOperationHandle<List<IResourceLocator>> _updateCatalogHandle;
-        private AsyncOperationHandle _downloadDepsHandle;
-        
-        private AwaitableCompletionSource _assetProviderSource = new();
         private readonly Dictionary<string, AsyncOperationHandle<Object>> _cache = new();
-        private Action<float> _reporter;
-        private string _remoteLoadDataJson;
-        private string _remoteCatalogPath;
+        private AsyncOperationHandle<IResourceLocator> _addressablesInitHandle;
+
+        private readonly AwaitableCompletionSource _assetProviderSource = new();
+        private AsyncOperationHandle _downloadDepsHandle;
         private bool _isFirstLaunch;
         private bool _isNetworkReachable;
         private string[] _labelsToDownload;
+        private AsyncOperationHandle<IResourceLocator> _loadCatalogHandle;
+        private string _remoteCatalogPath;
+        private string _remoteLoadDataJson;
+        private Action<float> _reporter;
+        private AsyncOperationHandle<List<IResourceLocator>> _updateCatalogHandle;
 
-        public LightweightAssetProvider()
-        {
-            ResourceManager.ExceptionHandler += ExceptionHandler;
-        }
+        public LightweightAssetProvider() => ResourceManager.ExceptionHandler += ExceptionHandler;
 
-        public void SubscribeOnUpdateAssetsProgress(Action<float> reporter)
-        {
-            _reporter = reporter;
-        }
+        public void SubscribeOnUpdateAssetsProgress(Action<float> reporter) => _reporter = reporter;
 
         public async Awaitable Init(string baseURL, string[] labelsToDownload)
         {
             _labelsToDownload = labelsToDownload;
-                
+
             var remoteLoadData = await GetAssetBundleURL(baseURL);
             if (remoteLoadData == null)
             {
                 Log.Warning($"init, failed to get url {baseURL}");
-                return;    
+                return;
             }
 
             _isNetworkReachable = Application.internetReachability != NetworkReachability.NotReachable;
@@ -80,35 +73,23 @@ namespace WayfarerKit.Systems.Assets
             _remoteCatalogPath = Path.Join(
                 remoteLoadData.assetsURL,
                 $"{remoteLoadData.catalogName}.bin"
-                );
-            
+            );
+
             // TODO: move to startup
             _addressablesInitHandle = Addressables.InitializeAsync();
             _addressablesInitHandle.Completed += OnAddressablesInitAction;
-            
+
             while (!_assetProviderSource.Awaitable.IsCompleted)
             {
                 var progress = 0f;
-                if (_addressablesInitHandle.IsValid())
-                {
-                    progress += 0.25f * _addressablesInitHandle.PercentComplete;
-                }
-                
-                if (_loadCatalogHandle.IsValid())
-                {
-                    progress += 0.25f * (1 + _loadCatalogHandle.PercentComplete);
-                }
-                
-                if (_downloadDepsHandle.IsValid())
-                {
-                    progress += 0.25f * (2 + _downloadDepsHandle.PercentComplete);
-                }
+                if (_addressablesInitHandle.IsValid()) progress += 0.25f * _addressablesInitHandle.PercentComplete;
 
-                if (_updateCatalogHandle.IsValid())
-                {
-                    progress += 0.25f * (3 + _updateCatalogHandle.PercentComplete);
-                }
-                
+                if (_loadCatalogHandle.IsValid()) progress += 0.25f * (1 + _loadCatalogHandle.PercentComplete);
+
+                if (_downloadDepsHandle.IsValid()) progress += 0.25f * (2 + _downloadDepsHandle.PercentComplete);
+
+                if (_updateCatalogHandle.IsValid()) progress += 0.25f * (3 + _updateCatalogHandle.PercentComplete);
+
                 _reporter?.Invoke(progress);
                 await Awaitable.NextFrameAsync();
             }
@@ -126,12 +107,12 @@ namespace WayfarerKit.Systems.Assets
                     _assetProviderSource.SetResult();
                     return;
                 }
-                
+
                 // load external assets
                 //Addressables.ClearResourceLocators();
 
                 _loadCatalogHandle = Addressables.LoadContentCatalogAsync(_remoteCatalogPath, true);
-                _loadCatalogHandle.Completed += OnLoadContentAction;    
+                _loadCatalogHandle.Completed += OnLoadContentAction;
             }
             else
             {
@@ -139,7 +120,7 @@ namespace WayfarerKit.Systems.Assets
                 _assetProviderSource.SetResult();
             }
         }
-        
+
         private void OnLoadContentAction(AsyncOperationHandle<IResourceLocator> loadCatalogHandle)
         {
             if (loadCatalogHandle.Status == AsyncOperationStatus.Succeeded)
@@ -153,12 +134,13 @@ namespace WayfarerKit.Systems.Assets
                 //         Addressables.RemoveResourceLocator(loc);    
                 //     }
                 // }
-                
+
                 Log.Debug($"init, on load content action {_remoteCatalogPath}");
 
                 _downloadDepsHandle = Addressables.DownloadDependenciesAsync(
                     _labelsToDownload, Addressables.MergeMode.Union, true);
                 _downloadDepsHandle.Completed += OnDownloadDepsAction;
+
                 // var catalogsToUpdate = new List<string>() { _remoteCatalogPath };
                 // PlayerPrefs.SetString("actual_catalog", _remoteLoadDataJson);
                 // _updateCatalogHandle = Addressables.UpdateCatalogs(catalogsToUpdate, true);
@@ -166,55 +148,49 @@ namespace WayfarerKit.Systems.Assets
             }
             else
             {
-                Log.Error($"init, failed to load catalog {_remoteLoadDataJson}" + 
-                          $" {loadCatalogHandle.OperationException}");
+                Log.Error($"init, failed to load catalog {_remoteLoadDataJson}" +
+                    $" {loadCatalogHandle.OperationException}");
                 _assetProviderSource.SetResult();
             }
         }
-        
+
         private void OnDownloadDepsAction(AsyncOperationHandle handle)
         {
             if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
                 Log.Debug($"init, on download content action {_remoteCatalogPath}");
-            }
             else
             {
-                Log.Error($"init, failed to download action {_remoteLoadDataJson}" + 
-                          $" {handle.OperationException}");
+                Log.Error($"init, failed to download action {_remoteLoadDataJson}" +
+                    $" {handle.OperationException}");
             }
-            
-            var catalogsToUpdate = new List<string>() { _remoteCatalogPath };
-            _updateCatalogHandle = Addressables.UpdateCatalogs(catalogsToUpdate, true);
+
+            var catalogsToUpdate = new List<string>
+                { _remoteCatalogPath };
+            _updateCatalogHandle = Addressables.UpdateCatalogs(catalogsToUpdate);
             _updateCatalogHandle.Completed += OnUpdateContentAction;
-            
+
             // can raise exception
             PlayerPrefs.SetString("actual_catalog", _remoteLoadDataJson);
         }
-        
+
         private void OnUpdateContentAction(AsyncOperationHandle<List<IResourceLocator>> updateCatalogHandle)
         {
             if (updateCatalogHandle.Status == AsyncOperationStatus.Succeeded)
-            {
                 Log.Debug($"init, catalog was updated {_remoteCatalogPath}");
-            }
             else
             {
-                Log.Error($"init, failed to update catalog {_remoteCatalogPath}" + 
-                          $" {updateCatalogHandle.OperationException}");
+                Log.Error($"init, failed to update catalog {_remoteCatalogPath}" +
+                    $" {updateCatalogHandle.OperationException}");
             }
 
             _assetProviderSource.SetResult();
         }
 
-        private async Awaitable<AddressablesRemoteConfig.AddressablesRemoteEntry> 
+        private async Awaitable<AddressablesRemoteConfig.AddressablesRemoteEntry>
             GetAssetBundleURL(string url)
         {
-            if (string.IsNullOrEmpty(url))
-            {
-                return null;
-            }
-            
+            if (string.IsNullOrEmpty(url)) return null;
+
             // 2 retry
             var res = await GetAssetBundleURLImpl(url);
             if (res.Item1 == null && res.Item2)
@@ -233,35 +209,32 @@ namespace WayfarerKit.Systems.Assets
                 {
                     try
                     {
-                        res = new Tuple<AddressablesRemoteConfig.AddressablesRemoteEntry, bool>(
+                        res = new(
                             JsonConvert.DeserializeObject<
                                 AddressablesRemoteConfig.AddressablesRemoteEntry>(actualCatalog), false);
                     }
                     catch (Exception ex)
                     {
-                        Log.Error($"init, failed to unpack actual catalog {actualCatalog} {ex}");        
+                        Log.Error($"init, failed to unpack actual catalog {actualCatalog} {ex}");
                     }
                 }
             }
             return res.Item1;
         }
-        
+
         private async Awaitable<Tuple<AddressablesRemoteConfig.AddressablesRemoteEntry, bool>> GetAssetBundleURLImpl(string url)
         {
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            using (var request = UnityWebRequest.Get(url))
             {
                 request.timeout = 5; // sec
                 var operation = request.SendWebRequest();
-                while (!operation.isDone)
-                {
-                    await Awaitable.NextFrameAsync();
-                }
+                while (!operation.isDone) await Awaitable.NextFrameAsync();
 
-                if (request.result == UnityWebRequest.Result.ConnectionError || 
+                if (request.result == UnityWebRequest.Result.ConnectionError ||
                     request.result == UnityWebRequest.Result.ProtocolError)
                 {
                     Log.Error($"error downloading file: {request.error}");
-                    return new Tuple<AddressablesRemoteConfig.AddressablesRemoteEntry, bool>(null, true);
+                    return new(null, true);
                 }
 
                 var bytes = request.downloadHandler.text;
@@ -271,14 +244,14 @@ namespace WayfarerKit.Systems.Assets
                     var remoteConfig = JsonConvert.DeserializeObject<AddressablesRemoteConfig>(bytes);
                     var entry = remoteConfig.Entries.FirstOrDefault(
                         x => x.version == Application.version);
-                    return new Tuple<AddressablesRemoteConfig.AddressablesRemoteEntry, bool>(entry, false);
+                    return new(entry, false);
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"failed to unpack json {bytes} {ex}");
                 }
 
-                return new Tuple<AddressablesRemoteConfig.AddressablesRemoteEntry, bool>(null, true);
+                return new(null, true);
             }
         }
 
@@ -347,7 +320,8 @@ namespace WayfarerKit.Systems.Assets
             return result[0];
             */
 
-            return Object.Instantiate(origin, parent);
+            var result = await Object.InstantiateAsync(origin, parent);
+            return result.FirstOrDefault();
         }
 
         public void ReleaseFor(AssetReference reference)
@@ -370,7 +344,7 @@ namespace WayfarerKit.Systems.Assets
 
             foreach (var item in _cache)
                 sb.Append($"<color=yellow>{item.Key}</color> <b>Name:</b>{item.Value.DebugName}; <b>Status:</b>{item.Value.Status}; <b>Done:</b>{item.Value.IsDone}; ");
-            
+
             sb.Append("</color>");
             Log.Debug(sb);
         }
