@@ -2,6 +2,7 @@ using PrimeTween;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+using WayfarerKit.Helpers.Serialization;
 
 namespace WayfarerKit.Helpers.UI
 {
@@ -9,12 +10,13 @@ namespace WayfarerKit.Helpers.UI
     {
         [SerializeField] private Button button;
         [SerializeField, Range(0.1f, 10f)] private float frequency = .5f;
+        [SerializeField] private Optional<Transform> customAnimationRoot;
 
         private Transform _cachedTransform;
         
         private void Awake()
         {
-            _cachedTransform = transform;
+            _cachedTransform = customAnimationRoot.Enabled ? customAnimationRoot.Value : transform;
             
             if (button == null)
                 button = gameObject.GetComponentInParent<Button>();
