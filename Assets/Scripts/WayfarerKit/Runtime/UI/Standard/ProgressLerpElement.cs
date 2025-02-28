@@ -5,8 +5,7 @@ namespace WayfarerKit.UI.Standard
 {
     public abstract class ProgressLerpElement : MonoBehaviour, IProgress<float>
     {
-        private const float FinalFillSpeed = 100f;
-
+        [Range(1f, 90f), SerializeField] private float finalFillSpeed = 50f;
         [Range(1f, 90f), SerializeField, Tooltip("How fast the progress bar fills up.")]
         private float progressFillSpeed = 5f;
 
@@ -18,7 +17,7 @@ namespace WayfarerKit.UI.Standard
         {
             var difference = Mathf.Abs(ViewFillAmount - _progress);
             var dynamicFillSpeed = Mathf.Approximately(_progress, 1f)
-                ? FinalFillSpeed
+                ? finalFillSpeed
                 : Mathf.Pow(difference, 2) * progressFillSpeed;
 
             ViewFillAmount = Mathf.Lerp(ViewFillAmount, _progress, dynamicFillSpeed * Time.deltaTime);
