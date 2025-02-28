@@ -16,25 +16,26 @@ namespace WayfarerKit.Helpers.UI
                 HideEverything();
         }
 
-        public void ShowFor<TEnum>(TEnum enumValue) where TEnum : Enum
+        public GameObject ShowFor<TEnum>(TEnum enumValue) where TEnum : Enum
         {
             var index = Convert.ToInt32(enumValue);
-            if (index < 0 || index >= gameObjects.Count)
-            {
-                Log.Warning($"Invalid enum value {enumValue} for {typeof(TEnum).Name}");
-                return;
-            }
-
-            ShowForIndex(index);
+            if (index >= 0 && index < gameObjects.Count) return ShowForIndex(index);
+            
+            Log.Warning($"Invalid enum value {enumValue} for {typeof(TEnum).Name}");
+            return null;
         }
 
-        public void ShowForIndex(int index)
+        public GameObject ShowForIndex(int index)
         {
             for (var i = 0; i < gameObjects.Count; i++)
             {
                 var obj = gameObjects[i];
                 obj.SetActive(i == index);
+
+                return obj;
             }
+
+            return null;
         }
 
         public void HideEverything() => ShowForIndex(-1);
