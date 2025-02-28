@@ -5,9 +5,9 @@ namespace WayfarerKit.UI.Standard
 {
     public abstract class ProgressLerpElement : MonoBehaviour, IProgress<float>
     {
-        private const float FinalFillSpeed = 20f;
+        private const float FinalFillSpeed = 100f;
 
-        [Range(1f, 10f), SerializeField, Tooltip("How fast the progress bar fills up.")]
+        [Range(1f, 90f), SerializeField, Tooltip("How fast the progress bar fills up.")]
         private float progressFillSpeed = 5f;
 
         private float _progress;
