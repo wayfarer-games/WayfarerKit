@@ -27,15 +27,17 @@ namespace WayfarerKit.Helpers.UI
 
         public GameObject ShowForIndex(int index)
         {
+            GameObject result = null;
             for (var i = 0; i < gameObjects.Count; i++)
             {
                 var obj = gameObjects[i];
                 obj.SetActive(i == index);
 
-                return obj;
+                if (i == index)
+                    result = obj;
             }
 
-            return null;
+            return result;
         }
 
         public void HideEverything() => ShowForIndex(-1);
