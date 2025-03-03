@@ -23,7 +23,7 @@ namespace WayfarerKit.UI.Standard
             ViewFillAmount = Mathf.Lerp(ViewFillAmount, _progress, dynamicFillSpeed * Time.deltaTime);
         }
 
-        protected virtual void OnEnable() => ResetProgress();
+        //protected virtual void OnEnable() => ResetProgress();
 
         public void Report(float value) => _progress = Mathf.Clamp01(value);
         private void ResetProgress() => _progress = ViewFillAmount = 0f;
