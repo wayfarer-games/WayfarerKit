@@ -26,6 +26,7 @@ namespace WayfarerKit.UI.Standard
         //protected virtual void OnEnable() => ResetProgress();
 
         public void Report(float value) => _progress = Mathf.Clamp01(value);
+        public void ReportForce(float value) => _progress = ViewFillAmount = Mathf.Clamp01(value);
         private void ResetProgress() => _progress = ViewFillAmount = 0f;
     }
 }
